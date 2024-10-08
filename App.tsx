@@ -1,118 +1,70 @@
-/**
- * Sample React Native App
- * https://github.com/facebook/react-native
- *
- * @format
- */
+import React, { useEffect, useState } from 'react';
+import { View, Text, Button, FlatList, Switch } from 'react-native';
+import { NativeEventEmitter, NativeModules } from 'react-native';
 
-import React from 'react';
-import type {PropsWithChildren} from 'react';
-import {
-  SafeAreaView,
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  Text,
-  useColorScheme,
-  View,
-} from 'react-native';
+const { NotificationListener } = NativeModules;
+const notificationEmitter = new NativeEventEmitter(NotificationListener);
 
-import {
-  Colors,
-  DebugInstructions,
-  Header,
-  LearnMoreLinks,
-  ReloadInstructions,
-} from 'react-native/Libraries/NewAppScreen';
-
-type SectionProps = PropsWithChildren<{
+type Notification = {
+  packageName: string;
   title: string;
-}>;
+  text: string;
+};
 
-function Section({children, title}: SectionProps): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
-  return (
-    <View style={styles.sectionContainer}>
-      <Text
-        style={[
-          styles.sectionTitle,
-          {
-            color: isDarkMode ? Colors.white : Colors.black,
-          },
-        ]}>
-        {title}
-      </Text>
-      <Text
-        style={[
-          styles.sectionDescription,
-          {
-            color: isDarkMode ? Colors.light : Colors.dark,
-          },
-        ]}>
-        {children}
-      </Text>
-    </View>
-  );
-}
+const App = () => {
+  const [notifications, setNotifications] = useState<Notification[]>([]);
+  const [selectedApps, setSelectedApps] = useState<string[]>([]);
 
-function App(): React.JSX.Element {
-  const isDarkMode = useColorScheme() === 'dark';
+  useEffect(() => {
+    const subscription = notificationEmitter.addListener('notificationReceived', (notification) => {
+      setNotifications((prevNotifications) => [...prevNotifications, notification]);
+    });
 
-  const backgroundStyle = {
-    backgroundColor: isDarkMode ? Colors.darker : Colors.lighter,
+    return () => {
+      subscription.remove();
+    };
+  }, []);
+
+  const toggleAppSelection = (packageName: string) => {
+    setSelectedApps((prevSelectedApps) =>
+      prevSelectedApps.includes(packageName)
+        ? prevSelectedApps.filter((app) => app !== packageName)
+        : [...prevSelectedApps, packageName]
+    );
+  };
+  const requestNotificationAccess = () => {
+    NotificationListener.requestNotificationAccess();
   };
 
-  return (
-    <SafeAreaView style={backgroundStyle}>
-      <StatusBar
-        barStyle={isDarkMode ? 'light-content' : 'dark-content'}
-        backgroundColor={backgroundStyle.backgroundColor}
-      />
-      <ScrollView
-        contentInsetAdjustmentBehavior="automatic"
-        style={backgroundStyle}>
-        <Header />
-        <View
-          style={{
-            backgroundColor: isDarkMode ? Colors.black : Colors.white,
-          }}>
-          <Section title="Step One">
-            Edit <Text style={styles.highlight}>App.tsx</Text> to change this
-            screen and then come back to see your edits.
-          </Section>
-          <Section title="See Your Changes">
-            <ReloadInstructions />
-          </Section>
-          <Section title="Debug">
-            <DebugInstructions />
-          </Section>
-          <Section title="Learn More">
-            Read the docs to discover what to do next:
-          </Section>
-          <LearnMoreLinks />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
-  );
-}
 
-const styles = StyleSheet.create({
-  sectionContainer: {
-    marginTop: 32,
-    paddingHorizontal: 24,
-  },
-  sectionTitle: {
-    fontSize: 24,
-    fontWeight: '600',
-  },
-  sectionDescription: {
-    marginTop: 8,
-    fontSize: 18,
-    fontWeight: '400',
-  },
-  highlight: {
-    fontWeight: '700',
-  },
-});
+  return (
+    <View>
+      <Button title="Enable Notification Access" onPress={requestNotificationAccess} />
+      <FlatList
+        data={notifications}
+        keyExtractor={(item) => item.packageName}
+        renderItem={({ item }) => (
+          <View>
+            <Text>App: {item.packageName}</Text>
+            <Text>Title: {item.title}</Text>
+            <Text>Text: {item.text}</Text>
+          </View>
+        )}
+      />
+      <Text>Select Apps to receive notifications:</Text>
+      <View>
+        {['com.example.app1', 'com.example.app2'].map((app) => (
+          <View key={app} style={{ flexDirection: 'row', alignItems: 'center' }}>
+            <Text>{app}</Text>
+            <Switch
+              value={selectedApps.includes(app)}
+              onValueChange={() => toggleAppSelection(app)}
+            />
+          </View>
+        ))}
+      </View>
+    </View>
+  );
+};
 
 export default App;

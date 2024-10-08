@@ -1,0 +1,49 @@
+# Node.js dependencies
+/node_modules/
+/package-lock.json
+/yarn.lock
+
+# Metro bundler
+/metro-cache
+/ram-bundles
+
+# React Native build files
+/android/app/build/
+/android/.gradle/
+/android/.idea/
+/android/local.properties
+/ios/build/
+/ios/Pods/
+/ios/DerivedData/
+/ios/*.xcworkspace
+/ios/xcuserdata
+/ios/*.xcuserstate
+
+# Xcode related
+*.xcuserdata
+*.xcuserstate
+*.xcworkspace
+*.xcsettings
+
+# macOS specific
+.DS_Store
+
+# Windows specific
+Thumbs.db
+
+# IDE settings
+.vscode/
+.idea/
+
+# Buck build system
+buck-out/
+.buckconfig.local
+.buckconfig
+.buckversion
+
+# Miscellaneous
+.env
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
