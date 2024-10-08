@@ -1,35 +1,14 @@
 package com.noticatcher
 
 import com.facebook.react.ReactActivity
-import com.facebook.react.ReactActivityDelegate
-import com.facebook.react.defaults.DefaultNewArchitectureEntryPoint.fabricEnabled
-import com.facebook.react.defaults.DefaultReactActivityDelegate
-import android.content.Intent
 import android.os.Bundle
-import android.provider.Settings
 
 class MainActivity : ReactActivity() {
-
-  /**
-   * Returns the name of the main component registered from JavaScript. This is used to schedule
-   * rendering of the component.
-   */
-  override fun getMainComponentName(): String = "NotiCatcher"
-
-  /**
-   * Returns the instance of the [ReactActivityDelegate]. We use [DefaultReactActivityDelegate]
-   * which allows you to enable New Architecture with a single boolean flags [fabricEnabled]
-   */
-  override fun createReactActivityDelegate(): ReactActivityDelegate =
-      DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
+    override fun getMainComponentName(): String? {
+        return "NotiCatcher"  // React Native의 entry component 이름
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-
-        // Foreground Service 시작
-        val serviceIntent = Intent(this, MyForegroundService::class.java)
-        startService(serviceIntent)
-        val intent = Intent(Settings.ACTION_IGNORE_BATTERY_OPTIMIZATION_SETTINGS)
-        startActivity(intent)
+        super.onCreate(null)
     }
 }
